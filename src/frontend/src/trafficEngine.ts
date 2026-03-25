@@ -44,8 +44,8 @@ export function getTrafficLevel(
   if (hour >= 0 && hour < 5) return "low";
 
   if (!isWeekend) {
-    if ((hour >= 7 && hour < 9) || (hour >= 17 && hour < 19)) return "heavy";
-    if (hour === 6 || hour === 9 || hour === 16 || hour === 19)
+    if ((hour >= 7 && hour < 10) || (hour >= 16 && hour < 19)) return "heavy";
+    if (hour === 6 || hour === 10 || hour === 15 || hour === 19)
       return "moderate";
   } else {
     if (hour >= 10 && hour < 14) return "moderate";
@@ -64,7 +64,7 @@ export function getTrafficMultiplier(
 ): number {
   if (mode === "walk") return 1.0;
   const multipliers: Record<TransportMode, Record<TrafficLevel, number>> = {
-    car: { low: 1.0, moderate: 1.4, heavy: 2.0 },
+    car: { low: 1.0, moderate: 1.5, heavy: 2.8 },
     bike: { low: 1.0, moderate: 1.1, heavy: 1.2 },
     walk: { low: 1.0, moderate: 1.0, heavy: 1.0 },
   };
