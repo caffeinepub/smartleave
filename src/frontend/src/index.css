@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/assets/fonts/PlusJakartaSans.woff2") format("woff2");
+}
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    /* SmartLeave dark theme tokens */
+    --background: 0.1 0.008 265;
+    --foreground: 0.96 0.005 250;
+    --card: 0.16 0.01 265;
+    --card-foreground: 0.96 0.005 250;
+    --popover: 0.18 0.012 265;
+    --popover-foreground: 0.96 0.005 250;
+    --primary: 0.73 0.155 65;
+    --primary-foreground: 0.1 0.008 265;
+    --secondary: 0.23 0.015 255;
+    --secondary-foreground: 0.96 0.005 250;
+    --muted: 0.18 0.01 265;
+    --muted-foreground: 0.72 0.015 255;
+    --accent: 0.73 0.155 65;
+    --accent-foreground: 0.1 0.008 265;
+    --destructive: 0.58 0.19 25;
+    --destructive-foreground: 0.96 0.005 250;
+    --border: 0.23 0.015 255;
+    --input: 0.2 0.012 265;
+    --ring: 0.73 0.155 65;
+    /* Traffic colors */
+    --traffic-low: 0.68 0.16 145;
+    --traffic-moderate: 0.77 0.14 75;
+    --traffic-heavy: 0.58 0.19 25;
+    --brand: 0.73 0.155 65;
+    /* Charts */
+    --chart-1: 0.73 0.155 65;
+    --chart-2: 0.68 0.16 145;
+    --chart-3: 0.77 0.14 75;
+    --chart-4: 0.58 0.19 25;
+    --chart-5: 0.72 0.015 255;
+    --sidebar: 0.13 0.009 265;
+    --sidebar-foreground: 0.96 0.005 250;
+    --sidebar-primary: 0.73 0.155 65;
+    --sidebar-primary-foreground: 0.1 0.008 265;
+    --sidebar-accent: 0.18 0.01 265;
+    --sidebar-accent-foreground: 0.96 0.005 250;
+    --sidebar-border: 0.23 0.015 255;
+    --sidebar-ring: 0.73 0.155 65;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .timeline-segment {
+    opacity: 0;
+    transform: scaleY(0.4);
+    animation: segmentReveal 0.4s ease forwards;
+  }
+
+  @keyframes segmentReveal {
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+
+  .brand-glow {
+    box-shadow: 0 0 0 2px oklch(var(--brand) / 0.5);
+  }
+
+  .card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px oklch(0 0 0 / 0.4);
+  }
+}
