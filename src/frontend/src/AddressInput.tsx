@@ -40,31 +40,35 @@ export interface AddressInputProps {
 
 async function fetchSuggestions(query: string): Promise<Suggestion[]> {
   const encoded = encodeURIComponent(query);
-  try {
-    const res = await fetch(
-      `https://photon.komoot.io/api/?q=${encoded}&limit=5`,
-    );
-    if (!res.ok) throw new Error("photon failed");
-    const data = await res.json();
-    return (data.features || []).map((f: any) => {
-      const p = f.properties || {};
-      const main = p.name || p.street || query;
-      const area = p.neighbourhood || p.district || p.suburb || p.county || "";
-      const city = p.city || p.town || p.village || "";
-      const sub = [area, city].filter(Boolean).join(", ");
-      const [lon, lat] = f.geometry?.coordinates || [0, 0];
-      return { displayName: main, subtitle: sub, lat, lon };
-    });
-  } catch {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=5&addressdetails=1`,
-      );
-      const data = await res.json();
-      return (data || []).map((item: any) => {
+
+  // Run Nominatim (India-biased) and Photon in parallel for best coverage
+  const nominatimPromise = fetch(
+    `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=8&addressdetails=1&namedetails=1&countrycodes=in&accept-language=en`,
+    { headers: { "Accept-Language": "en" } },
+  )
+    .then((res) => {
+      if (!res.ok) throw new Error("nominatim failed");
+      return res.json();
+    })
+    .then((data: any[]) =>
+      (data || []).map((item: any) => {
         const addr = item.address || {};
+        const namedetails = item.namedetails || {};
+        // Prefer the most specific name: amenity > building > railway > road
         const main =
-          addr.road || addr.suburb || item.display_name.split(",")[0];
+          addr.amenity ||
+          addr.building ||
+          addr.railway ||
+          addr.aeroway ||
+          addr.hospital ||
+          addr.school ||
+          addr.college ||
+          addr.university ||
+          namedetails["name:en"] ||
+          namedetails.name ||
+          addr.road ||
+          addr.suburb ||
+          item.display_name.split(",")[0].trim();
         const area =
           addr.neighbourhood ||
           addr.suburb ||
@@ -72,7 +76,8 @@ async function fetchSuggestions(query: string): Promise<Suggestion[]> {
           addr.district ||
           addr.county ||
           "";
-        const city = addr.city || addr.town || addr.village || "";
+        const city =
+          addr.city || addr.town || addr.village || addr.state_district || "";
         const sub = [area, city].filter(Boolean).join(", ");
         return {
           displayName: main,
@@ -80,11 +85,49 @@ async function fetchSuggestions(query: string): Promise<Suggestion[]> {
           lat: Number.parseFloat(item.lat),
           lon: Number.parseFloat(item.lon),
         };
-      });
-    } catch {
-      return [];
-    }
+      }),
+    )
+    .catch(() => [] as Suggestion[]);
+
+  const photonPromise = fetch(
+    `https://photon.komoot.io/api/?q=${encoded}&limit=5&lang=en`,
+  )
+    .then((res) => {
+      if (!res.ok) throw new Error("photon failed");
+      return res.json();
+    })
+    .then((data: any) =>
+      (data.features || []).map((f: any) => {
+        const p = f.properties || {};
+        const main = p.name || p.street || query;
+        const area =
+          p.neighbourhood || p.district || p.suburb || p.county || "";
+        const city = p.city || p.town || p.village || "";
+        const sub = [area, city].filter(Boolean).join(", ");
+        const [lon, lat] = f.geometry?.coordinates || [0, 0];
+        return { displayName: main, subtitle: sub, lat, lon };
+      }),
+    )
+    .catch(() => [] as Suggestion[]);
+
+  const [nominatimResults, photonResults] = await Promise.all([
+    nominatimPromise,
+    photonPromise,
+  ]);
+
+  // Merge: Nominatim first (India-biased), then Photon extras
+  // Deduplicate by proximity (~100m = ~0.001 degrees)
+  const all = [...nominatimResults, ...photonResults];
+  const deduped: Suggestion[] = [];
+  for (const item of all) {
+    const isDuplicate = deduped.some(
+      (d) =>
+        Math.abs(d.lat - item.lat) < 0.001 &&
+        Math.abs(d.lon - item.lon) < 0.001,
+    );
+    if (!isDuplicate) deduped.push(item);
   }
+  return deduped.slice(0, 7);
 }
 
 const LABEL_PRESETS = [
@@ -589,7 +632,7 @@ function SingleAddressInput({
       justSelectedRef.current = false;
       return;
     }
-    if (value.length < 3) {
+    if (value.length < 2) {
       setSuggestions([]);
       setShowDropdown(false);
       return;

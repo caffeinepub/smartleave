@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Navigation } from "lucide-react";
+import { Eye, EyeOff, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 
@@ -44,71 +44,150 @@ export function OnboardingScreen({ onDone }: Props) {
     onDone();
   }
 
-  const inputBase =
-    "w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm outline-none transition focus:border-[#38bdf8] focus:ring-1 focus:ring-[#38bdf8]/40";
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center px-5"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center px-5 overflow-y-auto py-8"
       style={{
         background:
-          "linear-gradient(135deg, #050e1a 0%, #0a1f35 40%, #0d2d4a 70%, #0a2240 100%)",
+          "linear-gradient(150deg, oklch(0.09 0.015 265) 0%, oklch(0.12 0.022 250) 45%, oklch(0.11 0.018 255) 75%, oklch(0.08 0.012 270) 100%)",
       }}
     >
+      {/* Decorative background elements */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: -80,
+            right: -80,
+            width: 320,
+            height: 320,
+            borderRadius: "50%",
+            background: "oklch(0.76 0.18 195 / 0.06)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -60,
+            left: -60,
+            width: 240,
+            height: 240,
+            borderRadius: "50%",
+            background: "oklch(0.76 0.18 195 / 0.04)",
+          }}
+        />
+      </div>
+
       {/* Logo */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="flex flex-col items-center mb-8"
+        transition={{ delay: 0.1, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-col items-center mb-8 relative"
       >
-        <div className="w-14 h-14 rounded-2xl bg-[#38bdf8]/20 border border-[#38bdf8]/30 flex items-center justify-center mb-3">
-          <Navigation className="w-7 h-7 text-[#38bdf8]" />
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 20,
+            background:
+              "linear-gradient(135deg, oklch(0.76 0.18 195), oklch(0.65 0.22 205))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 16,
+            boxShadow: "0 8px 32px oklch(0.76 0.18 195 / 0.35)",
+          }}
+        >
+          <Zap style={{ width: 30, height: 30, color: "white" }} />
         </div>
         <h1
-          className="text-4xl font-bold text-white tracking-tight"
-          style={{ fontFamily: "inherit" }}
+          style={{
+            fontSize: 44,
+            fontWeight: 800,
+            color: "white",
+            letterSpacing: "-1.5px",
+            lineHeight: 1,
+            fontFamily:
+              "'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif",
+          }}
         >
-          QuikLiv
+          Quik<span style={{ color: "oklch(0.76 0.18 195)" }}>Liv</span>
         </h1>
-        <p className="text-[#38bdf8]/80 text-sm mt-1 tracking-widest uppercase">
-          Know Before You Go
+        <p
+          style={{
+            color: "oklch(0.76 0.18 195 / 0.8)",
+            fontSize: 12,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            fontWeight: 600,
+            marginTop: 6,
+          }}
+        >
+          Smart Traffic Timing
         </p>
       </motion.div>
 
       {/* Card */}
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.5 }}
-        className="w-full max-w-sm"
+        transition={{ delay: 0.22, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-sm relative"
       >
         <div
-          className="rounded-2xl p-6 sm:p-8"
           style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            backdropFilter: "blur(12px)",
+            borderRadius: 24,
+            padding: "28px 28px",
+            background: "oklch(0.14 0.012 265 / 0.9)",
+            border: "1px solid oklch(0.76 0.18 195 / 0.2)",
+            backdropFilter: "blur(16px)",
           }}
         >
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white">
+          <div style={{ marginBottom: 24 }}>
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "white",
+                marginBottom: 6,
+              }}
+            >
               Create your account
             </h2>
-            <p className="text-white/50 text-sm mt-1">
-              Set up once and you're good to go
+            <p style={{ color: "oklch(0.68 0.018 240)", fontSize: 13 }}>
+              Set up once — your data stays on this device.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            noValidate
+            style={{ display: "flex", flexDirection: "column", gap: 16 }}
+          >
             {/* Username */}
             <div>
               <label
                 htmlFor="ob-username"
-                className="block text-xs font-medium text-white/60 mb-1.5 uppercase tracking-wide"
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "oklch(0.68 0.018 240)",
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
               >
                 Username
               </label>
@@ -122,12 +201,27 @@ export function OnboardingScreen({ onDone }: Props) {
                   setUsername(e.target.value);
                   setErrors((p) => ({ ...p, username: "" }));
                 }}
-                className={inputBase}
+                style={{
+                  width: "100%",
+                  background: "oklch(0.09 0.015 265 / 0.8)",
+                  border: `1px solid ${errors.username ? "oklch(0.62 0.19 25 / 0.7)" : "oklch(0.76 0.18 195 / 0.25)"}`,
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  color: "white",
+                  fontSize: 14,
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                  boxSizing: "border-box",
+                }}
               />
               {errors.username && (
                 <p
                   data-ocid="onboarding.error_state"
-                  className="text-red-400 text-xs mt-1"
+                  style={{
+                    color: "oklch(0.62 0.19 25)",
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
                 >
                   {errors.username}
                 </p>
@@ -138,7 +232,15 @@ export function OnboardingScreen({ onDone }: Props) {
             <div>
               <label
                 htmlFor="ob-email"
-                className="block text-xs font-medium text-white/60 mb-1.5 uppercase tracking-wide"
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "oklch(0.68 0.018 240)",
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
               >
                 Email
               </label>
@@ -152,10 +254,29 @@ export function OnboardingScreen({ onDone }: Props) {
                   setEmail(e.target.value);
                   setErrors((p) => ({ ...p, email: "" }));
                 }}
-                className={inputBase}
+                style={{
+                  width: "100%",
+                  background: "oklch(0.09 0.015 265 / 0.8)",
+                  border: `1px solid ${errors.email ? "oklch(0.62 0.19 25 / 0.7)" : "oklch(0.76 0.18 195 / 0.25)"}`,
+                  borderRadius: 12,
+                  padding: "12px 16px",
+                  color: "white",
+                  fontSize: 14,
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                  boxSizing: "border-box",
+                }}
               />
               {errors.email && (
-                <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                <p
+                  style={{
+                    color: "oklch(0.62 0.19 25)",
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
+                >
+                  {errors.email}
+                </p>
               )}
             </div>
 
@@ -163,11 +284,19 @@ export function OnboardingScreen({ onDone }: Props) {
             <div>
               <label
                 htmlFor="ob-password"
-                className="block text-xs font-medium text-white/60 mb-1.5 uppercase tracking-wide"
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "oklch(0.68 0.018 240)",
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                }}
               >
                 Password
               </label>
-              <div className="relative">
+              <div style={{ position: "relative" }}>
                 <input
                   data-ocid="onboarding.input"
                   id="ob-password"
@@ -178,22 +307,51 @@ export function OnboardingScreen({ onDone }: Props) {
                     setPassword(e.target.value);
                     setErrors((p) => ({ ...p, password: "" }));
                   }}
-                  className={`${inputBase} pr-11`}
+                  style={{
+                    width: "100%",
+                    background: "oklch(0.09 0.015 265 / 0.8)",
+                    border: `1px solid ${errors.password ? "oklch(0.62 0.19 25 / 0.7)" : "oklch(0.76 0.18 195 / 0.25)"}`,
+                    borderRadius: 12,
+                    padding: "12px 48px 12px 16px",
+                    color: "white",
+                    fontSize: 14,
+                    outline: "none",
+                    transition: "border-color 0.2s",
+                    boxSizing: "border-box",
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition"
+                  style={{
+                    position: "absolute",
+                    right: 14,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "oklch(0.68 0.018 240)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
                 >
                   {showPassword ? (
-                    <EyeOff className="w-4 h-4" />
+                    <EyeOff style={{ width: 16, height: 16 }} />
                   ) : (
-                    <Eye className="w-4 h-4" />
+                    <Eye style={{ width: 16, height: 16 }} />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-400 text-xs mt-1">{errors.password}</p>
+                <p
+                  style={{
+                    color: "oklch(0.62 0.19 25)",
+                    fontSize: 12,
+                    marginTop: 4,
+                  }}
+                >
+                  {errors.password}
+                </p>
               )}
             </div>
 
@@ -201,10 +359,21 @@ export function OnboardingScreen({ onDone }: Props) {
             <button
               data-ocid="onboarding.submit_button"
               type="submit"
-              className="w-full mt-2 py-3 rounded-xl font-semibold text-sm text-white transition-all active:scale-[0.98]"
               style={{
-                background: "linear-gradient(135deg, #38bdf8, #0ea5e9)",
-                boxShadow: "0 4px 24px rgba(56,189,248,0.3)",
+                width: "100%",
+                marginTop: 4,
+                padding: "14px",
+                borderRadius: 14,
+                fontWeight: 700,
+                fontSize: 15,
+                color: "oklch(0.09 0.015 265)",
+                background:
+                  "linear-gradient(135deg, oklch(0.78 0.18 195), oklch(0.68 0.22 205))",
+                boxShadow: "0 6px 28px oklch(0.76 0.18 195 / 0.35)",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                letterSpacing: "-0.2px",
               }}
             >
               Get Started →
@@ -212,7 +381,14 @@ export function OnboardingScreen({ onDone }: Props) {
           </form>
         </div>
 
-        <p className="text-center text-white/25 text-xs mt-5">
+        <p
+          style={{
+            textAlign: "center",
+            color: "oklch(0.68 0.018 240 / 0.5)",
+            fontSize: 12,
+            marginTop: 18,
+          }}
+        >
           Your info stays on this device only.
         </p>
       </motion.div>

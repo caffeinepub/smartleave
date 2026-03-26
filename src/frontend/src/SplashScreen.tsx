@@ -5,7 +5,6 @@ interface SplashScreenProps {
 }
 
 const LETTERS = ["Q", "u", "i", "k", "L", "i", "v"];
-const DOTS = ["dot-a", "dot-b", "dot-c"];
 
 export function SplashScreen({ onDone }: SplashScreenProps) {
   const [phase, setPhase] = useState<"intro" | "text" | "tagline" | "exit">(
@@ -13,13 +12,13 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
   );
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("text"), 600);
-    const t2 = setTimeout(() => setPhase("tagline"), 1400);
-    const t3 = setTimeout(() => setPhase("exit"), 2600);
+    const t1 = setTimeout(() => setPhase("text"), 500);
+    const t2 = setTimeout(() => setPhase("tagline"), 1300);
+    const t3 = setTimeout(() => setPhase("exit"), 2500);
     const t4 = setTimeout(() => {
       sessionStorage.setItem("splashShown", "1");
       onDone();
-    }, 3200);
+    }, 3100);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -39,59 +38,69 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
         alignItems: "center",
         justifyContent: "center",
         background:
-          "linear-gradient(135deg, #050e1a 0%, #0a1f35 40%, #0d2d4a 70%, #0a2240 100%)",
+          "linear-gradient(150deg, oklch(0.09 0.015 265) 0%, oklch(0.12 0.022 250) 40%, oklch(0.11 0.018 255) 70%, oklch(0.08 0.012 270) 100%)",
         transition: phase === "exit" ? "opacity 0.6s ease" : "none",
         opacity: phase === "exit" ? 0 : 1,
         pointerEvents: phase === "exit" ? "none" : "all",
       }}
     >
       <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(40px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+        @keyframes splashSlideUp {
+          from { transform: translateY(32px) scale(0.9); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
         }
         @keyframes splashPulseRing {
-          0% { transform: scale(1); opacity: 0.6; }
-          70% { transform: scale(1.6); opacity: 0; }
-          100% { transform: scale(1.6); opacity: 0; }
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(1.9); opacity: 0; }
         }
-        @keyframes letterReveal {
-          from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+        @keyframes splashLetterReveal {
+          from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
           to { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(16px); }
+        @keyframes splashFadeInUp {
+          from { opacity: 0; transform: translateY(18px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes roadDash {
-          from { stroke-dashoffset: 200; }
+        @keyframes splashRoadDash {
+          from { stroke-dashoffset: 240; }
           to { stroke-dashoffset: 0; }
         }
-        @keyframes carMove {
-          0% { transform: translateX(-8px); opacity: 0; }
-          30% { opacity: 1; }
+        @keyframes splashCarMove {
+          0% { transform: translateX(-16px); opacity: 0; }
+          40% { opacity: 1; }
           100% { transform: translateX(0); opacity: 1; }
         }
-        .splash-icon {
-          animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        @keyframes splashGlowPulse {
+          0%, 100% { box-shadow: 0 0 32px oklch(0.76 0.18 195 / 0.5), 0 0 64px oklch(0.76 0.18 195 / 0.2); }
+          50% { box-shadow: 0 0 48px oklch(0.76 0.18 195 / 0.7), 0 0 96px oklch(0.76 0.18 195 / 0.35); }
+        }
+        .splash-icon-wrap {
+          animation: splashSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .splash-icon-circle {
+          animation: splashGlowPulse 2.5s ease-in-out infinite;
         }
         .splash-letter {
           display: inline-block;
           opacity: 0;
-          animation: letterReveal 0.4s ease forwards;
+          animation: splashLetterReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         .splash-tagline {
           opacity: 0;
-          animation: fadeInUp 0.6s ease forwards;
+          animation: splashFadeInUp 0.65s ease forwards;
         }
         .splash-pulse-ring {
-          animation: splashPulseRing 1.8s ease-out infinite;
+          animation: splashPulseRing 2s ease-out infinite;
         }
-        .road-dash {
-          animation: roadDash 1.2s ease forwards;
+        .splash-road-dash {
+          animation: splashRoadDash 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-        .car-anim {
-          animation: carMove 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        .splash-car-anim {
+          animation: splashCarMove 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .splash-badge {
+          opacity: 0;
+          animation: splashFadeInUp 0.5s ease 0.2s forwards;
         }
       `}</style>
 
@@ -99,12 +108,12 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
       <div
         style={{
           position: "relative",
-          width: 100,
-          height: 100,
+          width: 120,
+          height: 120,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: 28,
+          marginBottom: 32,
         }}
       >
         {/* Pulse rings */}
@@ -114,158 +123,150 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
               className="splash-pulse-ring"
               style={{
                 position: "absolute",
-                width: 80,
-                height: 80,
+                width: 90,
+                height: 90,
                 borderRadius: "50%",
-                border: "2px solid rgba(56, 189, 248, 0.5)",
+                border: "2px solid oklch(0.76 0.18 195 / 0.5)",
               }}
             />
             <div
               className="splash-pulse-ring"
               style={{
                 position: "absolute",
-                width: 80,
-                height: 80,
+                width: 90,
+                height: 90,
                 borderRadius: "50%",
-                border: "2px solid rgba(56, 189, 248, 0.3)",
-                animationDelay: "0.5s",
+                border: "1.5px solid oklch(0.76 0.18 195 / 0.25)",
+                animationDelay: "0.6s",
               }}
             />
           </>
         )}
 
         {/* Icon circle */}
-        <div
-          className="splash-icon"
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #0ea5e9, #0284c7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow:
-              "0 0 32px rgba(14, 165, 233, 0.5), 0 0 64px rgba(14, 165, 233, 0.2)",
-          }}
-        >
-          {/* Car SVG */}
-          <svg
-            width="38"
-            height="38"
-            viewBox="0 0 38 38"
-            fill="none"
-            className="car-anim"
-            role="img"
-            aria-label="Car icon"
+        <div className="splash-icon-wrap" style={{ position: "relative" }}>
+          <div
+            className="splash-icon-circle"
+            style={{
+              width: 84,
+              height: 84,
+              borderRadius: "50%",
+              background:
+                "linear-gradient(135deg, oklch(0.76 0.18 195) 0%, oklch(0.65 0.22 205) 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <title>Car</title>
-            <path d="M6 22h26l-4-8H10L6 22z" fill="white" fillOpacity="0.95" />
-            <path d="M4 22h30v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4z" fill="white" />
-            <circle cx="10" cy="28" r="2.5" fill="#0ea5e9" />
-            <circle cx="28" cy="28" r="2.5" fill="#0ea5e9" />
-            <path
-              d="M14 22V16h10v6"
-              fill="rgba(14,165,233,0.3)"
-              stroke="rgba(14,165,233,0.6)"
-              strokeWidth="0.5"
-            />
-            <rect
-              x="3"
-              y="24"
-              width="4"
-              height="1.5"
-              rx="0.75"
-              fill="rgba(255,255,200,0.8)"
-            />
-            <rect
-              x="31"
-              y="24"
-              width="4"
-              height="1.5"
-              rx="0.75"
-              fill="rgba(255,100,100,0.8)"
-            />
-          </svg>
+            {/* Car SVG */}
+            <svg
+              width="44"
+              height="44"
+              viewBox="0 0 44 44"
+              fill="none"
+              className="splash-car-anim"
+              role="img"
+              aria-label="Car icon"
+            >
+              <title>Car</title>
+              <path
+                d="M7 25h30l-4.5-9H11.5L7 25z"
+                fill="white"
+                fillOpacity="0.95"
+              />
+              <path
+                d="M5 25h34v5a2.5 2.5 0 01-2.5 2.5H7.5A2.5 2.5 0 015 30v-5z"
+                fill="white"
+              />
+              <circle cx="12" cy="32" r="3" fill="oklch(0.65 0.22 205)" />
+              <circle cx="32" cy="32" r="3" fill="oklch(0.65 0.22 205)" />
+              <path
+                d="M16 25V18h12v7"
+                fill="oklch(0.76 0.18 195 / 0.3)"
+                stroke="oklch(0.76 0.18 195 / 0.6)"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="3"
+                y="27"
+                width="5"
+                height="2"
+                rx="1"
+                fill="oklch(0.95 0.1 90 / 0.9)"
+              />
+              <rect
+                x="36"
+                y="27"
+                width="5"
+                height="2"
+                rx="1"
+                fill="oklch(0.65 0.19 25 / 0.9)"
+              />
+            </svg>
+          </div>
         </div>
       </div>
 
-      {/* Road line below icon */}
+      {/* Road line */}
       <svg
-        width="120"
+        width="140"
         height="16"
-        viewBox="0 0 120 16"
+        viewBox="0 0 140 16"
         role="img"
         aria-label="Road"
         style={{
-          marginBottom: 24,
+          marginBottom: 28,
           opacity: phase !== "intro" ? 1 : 0,
-          transition: "opacity 0.4s ease 0.3s",
+          transition: "opacity 0.5s ease 0.2s",
         }}
       >
         <title>Road</title>
         <line
           x1="0"
           y1="8"
-          x2="120"
+          x2="140"
           y2="8"
-          stroke="rgba(255,255,255,0.15)"
+          stroke="oklch(0.95 0.006 220 / 0.1)"
           strokeWidth="3"
         />
         <line
           x1="0"
           y1="8"
-          x2="120"
+          x2="140"
           y2="8"
-          stroke="rgba(56, 189, 248, 0.7)"
+          stroke="oklch(0.76 0.18 195 / 0.75)"
           strokeWidth="2"
-          strokeDasharray="200"
+          strokeDasharray="240"
           strokeDashoffset="0"
-          className="road-dash"
+          className="splash-road-dash"
         />
-        <line
-          x1="20"
-          y1="8"
-          x2="35"
-          y2="8"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeDasharray="10 8"
-          opacity="0.5"
-        />
-        <line
-          x1="55"
-          y1="8"
-          x2="70"
-          y2="8"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeDasharray="10 8"
-          opacity="0.5"
-        />
-        <line
-          x1="90"
-          y1="8"
-          x2="105"
-          y2="8"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeDasharray="10 8"
-          opacity="0.5"
-        />
+        {[20, 55, 90].map((x) => (
+          <line
+            key={x}
+            x1={x}
+            y1="8"
+            x2={x + 14}
+            y2="8"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeDasharray="10 8"
+            opacity="0.4"
+          />
+        ))}
       </svg>
 
       {/* QuikLiv title */}
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ marginBottom: 14 }}>
         {phase !== "intro" && (
           <h1
             style={{
-              fontSize: 42,
+              fontSize: 48,
               fontWeight: 800,
-              letterSpacing: "-0.5px",
+              letterSpacing: "-1px",
               color: "white",
               lineHeight: 1,
-              fontFamily: "system-ui, -apple-system, sans-serif",
+              fontFamily:
+                "'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif",
             }}
           >
             {LETTERS.map((letter, i) => (
@@ -273,8 +274,8 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
                 key={letter + String(i)}
                 className="splash-letter"
                 style={{
-                  animationDelay: `${i * 0.07}s`,
-                  color: i < 4 ? "white" : "#38bdf8",
+                  animationDelay: `${i * 0.065}s`,
+                  color: i >= 4 ? "oklch(0.76 0.18 195)" : "white",
                 }}
               >
                 {letter}
@@ -286,36 +287,71 @@ export function SplashScreen({ onDone }: SplashScreenProps) {
 
       {/* Tagline */}
       {(phase === "tagline" || phase === "exit") && (
-        <p
-          className="splash-tagline"
-          style={{
-            color: "rgba(148, 210, 240, 0.85)",
-            fontSize: 14,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            fontWeight: 500,
-            fontFamily: "system-ui, -apple-system, sans-serif",
-          }}
-        >
-          Know Before You Go
-        </p>
+        <>
+          <p
+            className="splash-tagline"
+            style={{
+              color: "oklch(0.76 0.18 195 / 0.9)",
+              fontSize: 13,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              fontWeight: 600,
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              marginBottom: 16,
+            }}
+          >
+            Smart Traffic · Smarter Timing
+          </p>
+          <div
+            className="splash-badge"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 16px",
+              borderRadius: 999,
+              border: "1px solid oklch(0.76 0.18 195 / 0.3)",
+              background: "oklch(0.76 0.18 195 / 0.1)",
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "oklch(0.76 0.18 195)",
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: "oklch(0.76 0.18 195 / 0.85)",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              Time It Right. Arrive Chill.
+            </span>
+          </div>
+        </>
       )}
 
-      {/* Bottom dots */}
+      {/* Bottom progress dots */}
       <div
-        style={{ position: "absolute", bottom: 48, display: "flex", gap: 6 }}
+        style={{ position: "absolute", bottom: 44, display: "flex", gap: 8 }}
       >
-        {DOTS.map((id, i) => (
+        {[0, 1, 2].map((i) => (
           <div
-            key={id}
+            key={i}
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: i === 0 ? "#38bdf8" : "rgba(255,255,255,0.2)",
-              transition: "background 0.4s ease",
-              animation: `splashPulseRing ${1 + i * 0.3}s ease-out infinite`,
-              animationDelay: `${i * 0.2}s`,
+              width: i === 0 ? 24 : 7,
+              height: 7,
+              borderRadius: 999,
+              background:
+                i === 0 ? "oklch(0.76 0.18 195)" : "oklch(0.76 0.18 195 / 0.2)",
+              transition: "all 0.4s ease",
             }}
           />
         ))}

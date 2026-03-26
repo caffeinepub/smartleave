@@ -83,32 +83,29 @@ function TrafficBadge({ level }: { level: "low" | "moderate" | "heavy" }) {
   const config = {
     low: {
       label: "Low Traffic",
-      className: "bg-traffic-low/20 text-traffic-low border-traffic-low/30",
+      className: "bg-traffic-low/15 text-traffic-low border-traffic-low/30",
+      dot: "bg-traffic-low",
     },
     moderate: {
       label: "Moderate Traffic",
       className:
-        "bg-traffic-moderate/20 text-traffic-moderate border-traffic-moderate/30",
+        "bg-traffic-moderate/15 text-traffic-moderate border-traffic-moderate/30",
+      dot: "bg-traffic-moderate",
     },
     heavy: {
       label: "High Traffic",
       className:
-        "bg-traffic-heavy/20 text-traffic-heavy border-traffic-heavy/30",
+        "bg-traffic-heavy/15 text-traffic-heavy border-traffic-heavy/30",
+      dot: "bg-traffic-heavy",
     },
   };
   const c = config[level];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${c.className}`}
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border ${c.className}`}
     >
       <span
-        className={`w-2 h-2 rounded-full ${
-          level === "low"
-            ? "bg-traffic-low"
-            : level === "moderate"
-              ? "bg-traffic-moderate"
-              : "bg-traffic-heavy"
-        }`}
+        className={`w-2.5 h-2.5 rounded-full shrink-0 ${c.dot} ${level === "low" ? "" : "pulse-dot"}`}
       />
       {c.label}
     </span>
@@ -142,68 +139,74 @@ function DepartureCard({
   return (
     <div
       data-ocid={`departure.${w.label.toLowerCase()}.card`}
-      className={`relative flex flex-col gap-3 p-5 rounded-xl border card-hover ${
-        isRec ? "border-brand bg-card brand-glow" : "border-border bg-card"
+      className={`relative flex flex-col gap-3 rounded-2xl border overflow-hidden card-hover result-reveal ${
+        isRec ? "border-brand/60 bg-card brand-glow" : "border-border bg-card"
       }`}
     >
-      {isRec && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="bg-brand text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
-            ★ Best Option
+      {/* Colored top accent bar */}
+      <div className={`h-1 w-full ${isRec ? "bg-brand" : "bg-border"}`} />
+
+      <div className="px-5 pb-5 flex flex-col gap-3">
+        {isRec && (
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 bg-brand/15 text-brand text-[11px] font-bold px-2.5 py-1 rounded-full border border-brand/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+              Best Option
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span
+            className={`text-sm font-semibold ${
+              isRec ? "text-brand" : "text-muted-foreground"
+            }`}
+          >
+            {w.label}
           </span>
+          <TrafficBadge level={w.trafficLevel} />
         </div>
-      )}
 
-      <div className="flex items-center justify-between">
-        <span
-          className={`text-sm font-semibold ${
-            isRec ? "text-brand" : "text-muted-foreground"
-          }`}
-        >
-          {w.label}
-        </span>
-        <TrafficBadge level={w.trafficLevel} />
-      </div>
-
-      <div>
-        <p className="text-3xl font-bold text-foreground">
-          {formatTime(w.departureTime)}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2.5 py-1.5">
-          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">
-            {w.travelMinutes} min
-          </span>
+        <div>
+          <p className="text-4xl font-bold text-foreground font-display tracking-tight">
+            {formatTime(w.departureTime)}
+          </p>
         </div>
-        <DelayBadge risk={w.delayRisk} />
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 bg-secondary/60 rounded-xl px-3 py-1.5">
+            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-sm font-semibold text-foreground">
+              {w.travelMinutes} min
+            </span>
+          </div>
+          <DelayBadge risk={w.delayRisk} />
+        </div>
+
+        {isRec && (
+          <p className="text-xs text-muted-foreground border-t border-border pt-3 leading-relaxed">
+            {w.reason}
+          </p>
+        )}
+
+        {showReminder && (
+          <Button
+            data-ocid={`departure.${w.label.toLowerCase()}.set_reminder`}
+            variant={isReminded ? "secondary" : "outline"}
+            size="sm"
+            className={`mt-auto gap-2 rounded-xl min-h-[44px] ${
+              isReminded
+                ? "text-brand border-brand/40 bg-brand/10"
+                : "hover:border-brand hover:text-brand"
+            }`}
+            onClick={onSetReminder}
+            disabled={isReminded}
+          >
+            <Bell className="w-3.5 h-3.5" />
+            {isReminded ? "Reminder Set ✓" : "Set Reminder"}
+          </Button>
+        )}
       </div>
-
-      {isRec && (
-        <p className="text-xs italic text-muted-foreground border-t border-border pt-3">
-          {w.reason}
-        </p>
-      )}
-
-      {showReminder && (
-        <Button
-          data-ocid={`departure.${w.label.toLowerCase()}.set_reminder`}
-          variant={isReminded ? "secondary" : "outline"}
-          size="sm"
-          className={`mt-auto gap-2 ${
-            isReminded
-              ? "text-brand border-brand/40 bg-brand/10"
-              : "hover:border-brand hover:text-brand"
-          }`}
-          onClick={onSetReminder}
-          disabled={isReminded}
-        >
-          <Bell className="w-3.5 h-3.5" />
-          {isReminded ? "Reminder Set" : "Set Reminder"}
-        </Button>
-      )}
     </div>
   );
 }
@@ -442,6 +445,7 @@ function AppInner() {
 
   // Results
   const [result, setResult] = useState<PlanResult | null>(null);
+  const [isPlanning, setIsPlanning] = useState(false);
 
   // Custom time evaluator
   const [customDepTime, setCustomDepTime] = useState("");
@@ -612,6 +616,7 @@ function AppInner() {
 
   async function handlePlan() {
     if (!validate()) return;
+    setIsPlanning(true);
 
     let distKm = 20;
     let approx = false;
@@ -706,6 +711,7 @@ function AppInner() {
       isLongDistance,
     };
     setResult(newResult);
+    setIsPlanning(false);
 
     // Save trip to history
     const bestWindow =
@@ -932,29 +938,56 @@ function AppInner() {
         )}
 
         {/* Nav */}
-        <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
-                <Navigation className="w-4.5 h-4.5 text-primary-foreground" />
+        <header
+          className="sticky top-0 z-40 border-b border-border header-blur"
+          style={{ background: "oklch(var(--background) / 0.85)" }}
+        >
+          <div className="max-w-4xl mx-auto px-4 h-[68px] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(var(--brand)), oklch(0.65 0.22 205))",
+                  boxShadow: "0 4px 14px oklch(var(--brand) / 0.3)",
+                }}
+              >
+                <Navigation className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="text-lg font-bold tracking-tight text-foreground">
-                QuikLiv
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-bold tracking-tight text-foreground font-display">
+                  Quik
+                </span>
+                <span className="text-xl font-bold tracking-tight text-brand font-display">
+                  Liv
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-brand ml-0.5 pulse-dot" />
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground hidden sm:block">
-              Know Before You Go
-            </p>
             <div className="flex items-center gap-2">
               {displayUsername ? (
                 <button
                   type="button"
                   data-ocid="profile.open_modal_button"
                   onClick={() => setShowProfile(true)}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground hidden sm:flex mr-1 hover:text-foreground transition-colors cursor-pointer"
+                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
                 >
-                  Hi,{" "}
-                  <span className="text-brand font-medium">
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-primary-foreground shrink-0"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, oklch(var(--brand)), oklch(0.65 0.22 205))",
+                    }}
+                  >
+                    {displayUsername
+                      .trim()
+                      .split(" ")
+                      .map((w: string) => w[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </div>
+                  <span className="text-brand font-semibold">
                     {displayUsername}
                   </span>
                 </button>
@@ -1030,12 +1063,40 @@ function AppInner() {
         </header>
 
         {/* Hero */}
-        <section className="bg-gradient-to-b from-card to-background border-b border-border">
-          <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16 text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-              Time It Right. Arrive Chill.
+        <section
+          className="relative overflow-hidden border-b border-border"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(var(--card)) 0%, oklch(var(--background)) 100%)",
+          }}
+        >
+          {/* Decorative background glow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 60% at 50% -10%, oklch(var(--brand) / 0.08), transparent)",
+            }}
+          />
+          <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16 text-center relative">
+            {/* Smart badge */}
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand/25 bg-brand/8 mb-5"
+              style={{ background: "oklch(var(--brand) / 0.08)" }}
+            >
+              <span className="w-2 h-2 rounded-full bg-brand pulse-dot" />
+              <span className="text-xs font-semibold text-brand tracking-wide uppercase">
+                Smart Traffic Simulation
+              </span>
+            </div>
+            <h1
+              className="text-4xl sm:text-5xl font-bold text-foreground leading-tight font-display"
+              style={{ letterSpacing: "-1px" }}
+            >
+              Time It Right.{" "}
+              <span className="brand-gradient-text">Arrive Chill.</span>
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
               QuikLiv finds the best time to leave so you skip the stress 🚀
             </p>
           </div>
@@ -1046,17 +1107,20 @@ function AppInner() {
           {/* Input Card */}
           <section
             data-ocid="input.section"
-            className="bg-card border border-border rounded-2xl p-6 space-y-6"
+            className="bg-card border border-border rounded-3xl p-6 sm:p-8 space-y-6 glass-card"
           >
-            <h2 className="text-xl font-bold text-foreground">
-              Plan Your Trip
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <div className="w-1 h-6 rounded-full bg-brand" />
+              <h2 className="text-xl font-bold text-foreground font-display">
+                Plan Your Trip
+              </h2>
+            </div>
 
             {/* Origin + Destination */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-foreground font-medium flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-brand" /> Origin
+                  <MapPin className="w-3.5 h-3.5 text-brand" /> Departure
                 </Label>
                 <AddressInput
                   data-ocid="trip.origin.input"
@@ -1230,21 +1294,56 @@ function AppInner() {
             </div>
 
             {/* CTA */}
-            <Button
+            <button
+              type="button"
               data-ocid="trip.find_times.primary_button"
-              className="w-full h-14 text-base font-bold bg-brand text-primary-foreground hover:bg-brand/90 rounded-xl gap-2 shadow-lg"
+              className="w-full h-14 text-base font-bold text-primary-foreground rounded-2xl gap-2 flex items-center justify-center transition-all active:scale-[0.98]"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(var(--brand)), oklch(0.65 0.22 205))",
+                boxShadow:
+                  "0 6px 32px oklch(var(--brand) / 0.35), 0 2px 8px oklch(var(--brand) / 0.15)",
+                fontFamily: "inherit",
+                border: "none",
+                cursor: "pointer",
+              }}
               onClick={handlePlan}
             >
-              Find Best Times
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+              Search
+              <ArrowRight className="w-5 h-5 ml-1" />
+            </button>
           </section>
 
+          {/* Loading state */}
+          {isPlanning && (
+            <div
+              data-ocid="trip.loading_state"
+              className="flex flex-col items-center justify-center py-16 result-reveal"
+            >
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 spin-slow"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(var(--brand) / 0.15), oklch(var(--brand) / 0.05))",
+                  border: "2px solid oklch(var(--brand) / 0.3)",
+                }}
+              >
+                <Navigation className="w-8 h-8 text-brand" />
+              </div>
+              <p className="text-foreground font-semibold text-base font-display">
+                Calculating best times...
+              </p>
+              <p className="text-muted-foreground text-sm mt-1">
+                Analyzing traffic patterns
+              </p>
+            </div>
+          )}
+
           {/* Results */}
-          {result && (
+          {result && !isPlanning && (
             <div id="results-section" className="space-y-8">
               {/* Route Summary Header */}
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border text-sm">
+              <div className="flex items-center gap-3 px-4 py-4 rounded-2xl bg-card border border-border text-sm result-reveal glass-card">
                 <MapPin className="w-4 h-4 text-brand shrink-0" />
                 <div className="flex-1 min-w-0">
                   {(() => {
@@ -1323,9 +1422,11 @@ function AppInner() {
 
               {/* Departure Suggestions */}
               <section data-ocid="departure.section">
-                <div className="flex items-center gap-2 mb-4">
-                  <ArrowRight className="w-5 h-5 text-brand" />
-                  <h2 className="text-xl font-bold text-foreground">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-8 h-8 rounded-xl bg-brand/15 border border-brand/30 flex items-center justify-center shrink-0">
+                    <ArrowRight className="w-4 h-4 text-brand" />
+                  </div>
+                  <h2 className="text-xl font-bold text-foreground font-display">
                     Departure — Going
                   </h2>
                   {isOfficeHours && (
@@ -1394,11 +1495,11 @@ function AppInner() {
               <section data-ocid="custom_dep.section">
                 <div className="flex items-center gap-2 mb-4">
                   <Clock className="w-5 h-5 text-brand" />
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-foreground font-display">
                     Check Your Departure Time
                   </h2>
                 </div>
-                <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+                <div className="bg-secondary/20 border border-border rounded-2xl p-5 space-y-4">
                   <p className="text-sm text-muted-foreground">
                     Enter a custom time to see how traffic looks and whether
                     it's a good choice.
@@ -1531,7 +1632,7 @@ function AppInner() {
               <section data-ocid="timeline.section">
                 <div className="flex items-center gap-2 mb-4">
                   <Clock className="w-5 h-5 text-brand" />
-                  <h2 className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-foreground font-display">
                     Traffic Timeline — Next 6 Hours
                   </h2>
                 </div>
@@ -1979,11 +2080,20 @@ function AppInner() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-border bg-card mt-12">
-          <div className="max-w-4xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-brand flex items-center justify-center">
-                <Navigation className="w-3.5 h-3.5 text-primary-foreground" />
+        <footer
+          className="border-t border-border mt-16"
+          style={{ background: "oklch(var(--card))" }}
+        >
+          <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{
+                  background:
+                    "linear-gradient(135deg, oklch(var(--brand)), oklch(0.65 0.22 205))",
+                }}
+              >
+                <Navigation className="w-4 h-4 text-primary-foreground" />
               </div>
               <span className="text-sm font-semibold text-foreground">
                 QuikLiv
