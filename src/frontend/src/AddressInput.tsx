@@ -14,6 +14,7 @@ export interface SavedAddress {
   address: string;
   lat?: number;
   lon?: number;
+  fieldType?: "from" | "to";
 }
 
 export interface AddressInputProps {

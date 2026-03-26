@@ -10,7 +10,6 @@ import {
   Car,
   Clock,
   Flag,
-  Footprints,
   Locate,
   MapPin,
   Moon,
@@ -485,20 +484,48 @@ function AppInner() {
     localStorage.setItem("quikliv_saved_addresses", JSON.stringify(updated));
   }
 
-  function handleSaveAddress(
+  function handleSaveAddressFrom(
     address: string,
     label: string,
     lat?: number,
     lon?: number,
   ) {
-    if (savedAddresses.length >= 5) return;
-    if (savedAddresses.some((s) => s.address === address)) return;
+    if (savedAddresses.length >= 10) return;
+    if (
+      savedAddresses.some(
+        (s) => s.address === address && s.fieldType === "from",
+      )
+    )
+      return;
     const newEntry: SavedAddress = {
       id: Date.now().toString(),
       label,
       address,
       lat,
       lon,
+      fieldType: "from",
+    };
+    persistSaved([...savedAddresses, newEntry]);
+  }
+
+  function handleSaveAddressTo(
+    address: string,
+    label: string,
+    lat?: number,
+    lon?: number,
+  ) {
+    if (savedAddresses.length >= 10) return;
+    if (
+      savedAddresses.some((s) => s.address === address && s.fieldType === "to")
+    )
+      return;
+    const newEntry: SavedAddress = {
+      id: Date.now().toString(),
+      label,
+      address,
+      lat,
+      lon,
+      fieldType: "to",
     };
     persistSaved([...savedAddresses, newEntry]);
   }
@@ -766,13 +793,11 @@ function AppInner() {
   }> = [
     { id: "car", label: "Car", icon: <Car className="w-4 h-4" /> },
     { id: "bike", label: "Bike", icon: <Bike className="w-4 h-4" /> },
-    { id: "walk", label: "Walk", icon: <Footprints className="w-4 h-4" /> },
   ];
 
   const modeLabels: Record<TransportMode, string> = {
     car: "Car",
     bike: "Bike",
-    walk: "Walk",
   };
 
   const timelineColor = (level: "low" | "moderate" | "heavy") => {
@@ -1008,13 +1033,10 @@ function AppInner() {
         <section className="bg-gradient-to-b from-card to-background border-b border-border">
           <div className="max-w-4xl mx-auto px-4 py-12 sm:py-16 text-center">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-              Find Your <span className="text-brand">Perfect</span>
-              <br />
-              Departure Time
+              Time It Right. Arrive Chill.
             </h1>
             <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              QuikLiv analyzes traffic patterns to suggest the best times to
-              leave — so you arrive stress-free.
+              QuikLiv finds the best time to leave so you skip the stress 🚀
             </p>
           </div>
         </section>
@@ -1048,8 +1070,10 @@ function AppInner() {
                   }
                   placeholder="e.g. Home, New York"
                   error={errors.origin}
-                  savedAddresses={savedAddresses}
-                  onSaveAddress={handleSaveAddress}
+                  savedAddresses={savedAddresses.filter(
+                    (s) => s.fieldType === "from" || !s.fieldType,
+                  )}
+                  onSaveAddress={handleSaveAddressFrom}
                   onSelectSaved={handleSelectSavedOrigin}
                   onDeleteSaved={handleDeleteSaved}
                   currentCoords={originCoords ?? undefined}
@@ -1097,8 +1121,10 @@ function AppInner() {
                   }
                   placeholder="e.g. Work, Airport"
                   error={errors.destination}
-                  savedAddresses={savedAddresses}
-                  onSaveAddress={handleSaveAddress}
+                  savedAddresses={savedAddresses.filter(
+                    (s) => s.fieldType === "to" || !s.fieldType,
+                  )}
+                  onSaveAddress={handleSaveAddressTo}
                   onSelectSaved={handleSelectSavedDest}
                   onDeleteSaved={handleDeleteSaved}
                   currentCoords={destCoords ?? undefined}
