@@ -26,6 +26,7 @@ import { I18nProvider } from "./I18nProvider";
 import { OfficeHoursGrid } from "./OfficeHoursGrid";
 import { OnboardingScreen } from "./OnboardingScreen";
 import ProfileModal from "./ProfileModal";
+import { RouteMap } from "./RouteMap";
 import { SplashScreen } from "./SplashScreen";
 import { saveTripToHistory } from "./TripHistory";
 import { WeatherBanner, useWeather } from "./WeatherBanner";
@@ -344,13 +345,18 @@ async function fetchRouteDistance(
   originCoords: { lat: number; lon: number },
   destCoords: { lat: number; lon: number },
   _mode: TransportMode,
-): Promise<{ distanceKm: number; isApproximate: boolean }> {
+): Promise<{
+  distanceKm: number;
+  isApproximate: boolean;
+  geometry: [number, number][] | null;
+}> {
   const { lat: oLat, lon: oLon } = originCoords;
   const { lat: dLat, lon: dLon } = destCoords;
+  const profile = _mode === "bike" ? "cycling" : "driving";
 
   const osrmUrls = [
-    `https://router.project-osrm.org/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=false`,
-    `https://routing.openstreetmap.de/routed-car/route/v1/driving/${oLon},${oLat};${dLon},${dLat}?overview=false`,
+    `https://router.project-osrm.org/route/v1/${profile}/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson`,
+    `https://routing.openstreetmap.de/routed-${_mode === "bike" ? "bike" : "car"}/route/v1/${profile}/${oLon},${oLat};${dLon},${dLat}?overview=full&geometries=geojson`,
   ];
 
   for (const url of osrmUrls) {
@@ -359,10 +365,18 @@ async function fetchRouteDistance(
       if (!res.ok) continue;
       const data = await res.json();
       const meters = data?.routes?.[0]?.distance;
+      const coords = data?.routes?.[0]?.geometry?.coordinates as
+        | [number, number][]
+        | undefined;
       if (meters) {
+        // Convert OSRM [lon, lat] to Leaflet [lat, lon]
+        const geometry: [number, number][] | null = coords
+          ? coords.map(([lon, lat]) => [lat, lon])
+          : null;
         return {
           distanceKm: Math.round((meters / 1000) * 10) / 10,
           isApproximate: false,
+          geometry,
         };
       }
     } catch {
@@ -374,6 +388,7 @@ async function fetchRouteDistance(
   return {
     distanceKm: Math.round(haversineKm(oLat, oLon, dLat, dLon) * 10) / 10,
     isApproximate: true,
+    geometry: null,
   };
 }
 
@@ -446,6 +461,9 @@ function AppInner() {
   // Results
   const [result, setResult] = useState<PlanResult | null>(null);
   const [isPlanning, setIsPlanning] = useState(false);
+  const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(
+    null,
+  );
 
   // Custom time evaluator
   const [customDepTime, setCustomDepTime] = useState("");
@@ -624,13 +642,11 @@ function AppInner() {
     // Always try OSRM if coords available
     if (originCoords && destCoords) {
       try {
-        const { distanceKm, isApproximate } = await fetchRouteDistance(
-          originCoords,
-          destCoords,
-          mode,
-        );
+        const { distanceKm, isApproximate, geometry } =
+          await fetchRouteDistance(originCoords, destCoords, mode);
         distKm = distanceKm;
         approx = isApproximate;
+        if (geometry) setRouteGeometry(geometry);
       } catch {
         // keep default 20km fallback
       }
@@ -1628,6 +1644,19 @@ function AppInner() {
                 </div>
               </section>
 
+              {/* Route Map */}
+              {routeGeometry &&
+                routeGeometry.length >= 2 &&
+                originCoords &&
+                destCoords && (
+                  <RouteMap
+                    routeCoords={routeGeometry}
+                    originLabel={origin.split(", ").slice(0, 2).join(", ")}
+                    destLabel={destination.split(", ").slice(0, 2).join(", ")}
+                    darkMode={isDark}
+                  />
+                )}
+
               {/* Traffic Timeline */}
               <section data-ocid="timeline.section">
                 <div className="flex items-center gap-2 mb-4">
@@ -2065,6 +2094,7 @@ function AppInner() {
                   className="gap-2 border-border text-muted-foreground hover:text-foreground"
                   onClick={() => {
                     setResult(null);
+                    setRouteGeometry(null);
                     setReminders([]);
                     setActiveAlert(null);
                     firedReminders.current.clear();
